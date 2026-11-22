@@ -48,6 +48,10 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Host: mcp.example.test' -H 'Content-Type: application/json' -d '{}' http://localhost:8080/mcp)" = "401"
           # Framing is forbidden.
           curl -sI -H 'Host: mcp.example.test' http://localhost:8080/login | grep -qi '^x-frame-options: deny'
+          # Each security header is sent exactly once (nginx in the image must not add a second copy).
+          for h in x-frame-options x-content-type-options referrer-policy; do
+            test "$(curl -sI -H 'Host: mcp.example.test' http://localhost:8080/login | grep -ci "^$h:")" = "1"
+          done
           # The database was migrated, and the scheduler container is running.
           docker compose exec -T app php artisan migrate:status | grep -q 'Ran'
           docker compose ps --status running --services | grep -q scheduler
