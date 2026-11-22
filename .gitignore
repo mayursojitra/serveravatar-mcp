@@ -1,0 +1,35 @@
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/bootstrap/ssr
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+auth.json
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+
+# The first build, kept locally for reference only. Never committed.
+/_archive/
+
+# Working notes, design-review page and crawled API reference: kept locally, not published.
+/docs/internal/
+
+
+# Docker Compose settings and secrets (see docker-compose.yml).
+/docker.env

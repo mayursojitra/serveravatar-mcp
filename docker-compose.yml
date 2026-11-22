@@ -1,0 +1,71 @@
+# ServerAvatar MCP with Docker Compose: the app, its scheduler and a MariaDB database.
+#   1. cp .env.docker.example .env      and fill in the values marked CHANGE
+#   2. docker compose up -d --build
+#   3. docker compose exec app php artisan serveravatar:create-admin you@example.com
+# Put an HTTPS reverse proxy in front of port 8080 (see docs/self-hosting.md).
+
+x-app: &app
+  build: .
+  image: serveravatar-mcp:local
+  restart: unless-stopped
+  environment: &app-env
+    APP_KEY: ${APP_KEY:?Set APP_KEY in .env (docker run --rm serveravatar-mcp:local php artisan key:generate --show)}
+    APP_URL: ${APP_URL:?Set APP_URL in .env to the https address people will open}
+    TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
+    TRUSTED_HOSTS: ${TRUSTED_HOSTS:-}
+    DB_CONNECTION: mysql
+    DB_HOST: db
+    DB_PORT: 3306
+    DB_DATABASE: serveravatar_mcp
+    DB_USERNAME: serveravatar
+    DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}
+    MAIL_MAILER: ${MAIL_MAILER:-log}
+    MAIL_HOST: ${MAIL_HOST:-}
+    MAIL_PORT: ${MAIL_PORT:-587}
+    MAIL_USERNAME: ${MAIL_USERNAME:-}
+    MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+    MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-no-reply@example.com}
+  volumes:
+    # OAuth signing keys and logs live here. Back it up together with APP_KEY and the database.
+    - storage:/var/www/html/storage
+
+services:
+  app:
+    <<: *app
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  scheduler:
+    <<: *app
+    command: ["php", "/var/www/html/artisan", "schedule:work"]
+    environment:
+      <<: *app-env
+      SKIP_BOOTSTRAP: "1"
+    depends_on:
+      - app
+    healthcheck:
+      disable: true
+
+  db:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: serveravatar_mcp
+      MARIADB_USER: serveravatar
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MARIADB_RANDOM_ROOT_PASSWORD: "1"
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  storage:
+  dbdata:

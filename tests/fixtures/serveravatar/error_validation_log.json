@@ -1,0 +1,8 @@
+{
+  "message": "The log field is required.",
+  "errors": {
+    "log": [
+      "The log field is required."
+    ]
+  }
+}

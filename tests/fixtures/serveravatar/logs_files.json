@@ -1,0 +1,6 @@
+{
+  "logFiles": {
+    "example.log": "Example log",
+    "example/error.log": "Example error log"
+  }
+}

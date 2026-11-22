@@ -1,0 +1,18 @@
+{
+  "installed": true,
+  "forceHttps": 1,
+  "certificateInfo": {
+    "issuer": "Example CA",
+    "primary_domain": "example.test",
+    "domains": [
+      "domains-sample",
+      "domains-sample"
+    ],
+    "issued_on": "2024-01-01 00:00:00",
+    "expires_on": "2024-01-01 00:00:00",
+    "is_expired": false,
+    "validity_left": 1,
+    "type": "example-type",
+    "temp_domain": 1
+  }
+}

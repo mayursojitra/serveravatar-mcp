@@ -1,0 +1,61 @@
+name: docker
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Prepare settings
+        run: |
+          {
+            echo "APP_URL=https://mcp.example.test"
+            echo "APP_KEY=base64:$(openssl rand -base64 32)"
+            echo "DB_PASSWORD=$(openssl rand -hex 16)"
+          } > .env
+
+      - name: Build and start
+        run: docker compose up -d --build
+
+      - name: Wait until the app is healthy
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/up > /dev/null; then exit 0; fi
+            sleep 3
+          done
+          echo "The app did not become healthy in time." >&2
+          docker compose logs
+          exit 1
+
+      - name: Smoke test
+        run: |
+          set -e
+          # The sign-in page answers on the configured host.
+          curl -fsS -H 'Host: mcp.example.test' http://localhost:8080/login | grep -q 'Sign in\|Log in\|email'
+          # Discovery names the configured host.
+          curl -fsS -H 'Host: mcp.example.test' http://localhost:8080/.well-known/oauth-authorization-server | grep -q 'mcp.example.test'
+          # Another host is refused.
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: evil.example' http://localhost:8080/login)" = "400"
+          # /mcp wants a token.
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Host: mcp.example.test' -H 'Content-Type: application/json' -d '{}' http://localhost:8080/mcp)" = "401"
+          # Framing is forbidden.
+          curl -sI -H 'Host: mcp.example.test' http://localhost:8080/login | grep -qi '^x-frame-options: deny'
+          # The database was migrated, and the scheduler container is running.
+          docker compose exec -T app php artisan migrate:status | grep -q 'Ran'
+          docker compose ps --status running --services | grep -q scheduler
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Stop
+        if: always()
+        run: docker compose down -v

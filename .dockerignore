@@ -1,0 +1,26 @@
+# Never bake secrets, keys, dependencies or local state into the image.
+.git
+.github
+.env
+.env.*
+!.env.example
+!.env.docker.example
+node_modules
+vendor
+public/build
+public/hot
+bootstrap/cache/*.php
+storage/*.key
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/app/*
+tests
+docs
+_archive
+.phpunit.cache
+.phpunit.result.cache
+*.md
+!README.md
+docker.env

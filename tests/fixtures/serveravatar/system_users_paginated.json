@@ -1,0 +1,52 @@
+{
+  "systemUsers": {
+    "current_page": 1,
+    "data": [
+      {
+        "id": 2001,
+        "server_id": 1002,
+        "username": "exampleuser",
+        "password": "password-sample",
+        "public_key": "ssh-rsa AAAA-sample",
+        "group": "system_users",
+        "root_access": 0,
+        "created_at": "2024-01-01 00:00:00",
+        "updated_at": "2024-01-01 00:00:00",
+        "deleted_at": null,
+        "ssh_access": false,
+        "applications": [
+          {
+            "id": 3001,
+            "name": "example-app",
+            "system_user_id": 2001,
+            "license_key": "license-sample"
+          }
+        ]
+      },
+      {
+        "id": 2002,
+        "server_id": 1002,
+        "username": "unusedexample",
+        "password": "password-sample",
+        "public_key": null,
+        "group": "system_users",
+        "root_access": 0,
+        "created_at": "2024-01-01 00:00:00",
+        "updated_at": "2024-01-01 00:00:00",
+        "deleted_at": null,
+        "ssh_access": true,
+        "applications": []
+      }
+    ],
+    "first_page_url": "https://api.example.test/system-users?page=1",
+    "from": 1,
+    "last_page": 1,
+    "last_page_url": "https://api.example.test/system-users?page=1",
+    "next_page_url": null,
+    "path": "https://api.example.test/system-users",
+    "per_page": 15,
+    "prev_page_url": null,
+    "to": 2,
+    "total": 2
+  }
+}

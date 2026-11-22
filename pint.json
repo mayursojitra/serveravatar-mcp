@@ -1,0 +1,5 @@
+{
+    "preset": "laravel",
+    "exclude": ["_archive"],
+    "notPath": ["_archive", "vendor", "node_modules", "storage", "bootstrap/cache"]
+}

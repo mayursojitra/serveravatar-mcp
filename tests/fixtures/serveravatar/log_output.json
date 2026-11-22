@@ -1,0 +1,4 @@
+{
+  "output": "line one\nline two\nline three\n",
+  "path": "/var/log/example.log"
+}

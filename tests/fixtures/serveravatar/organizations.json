@@ -1,0 +1,51 @@
+{
+  "organizations": [
+    {
+      "id": 1001,
+      "name": "Example Org",
+      "created_at": "2024-01-01 00:00:00",
+      "members": [
+        {
+          "name": "Example Org",
+          "avatar": "https://example.test/avatar.png",
+          "email": "member@example.test",
+          "roles": [
+            {
+              "id": 1002,
+              "role": "example-role"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1003,
+      "name": "Example Org",
+      "created_at": "2024-01-01 00:00:00",
+      "members": [
+        {
+          "name": "Example Org",
+          "avatar": "https://example.test/avatar.png",
+          "email": "member@example.test",
+          "roles": [
+            {
+              "id": 1004,
+              "role": "example-role"
+            }
+          ]
+        },
+        {
+          "name": "Example Org",
+          "avatar": "https://example.test/avatar.png",
+          "email": "member@example.test",
+          "roles": [
+            {
+              "id": 1005,
+              "role": "example-role"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

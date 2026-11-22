@@ -1,0 +1,65 @@
+{
+  "databases": {
+    "current_page": 1,
+    "data": [
+      {
+        "id": 1001,
+        "server_id": 1002,
+        "name": "exampledb",
+        "size": 1,
+        "automatic_backup": 1,
+        "created_at": "2024-01-01 00:00:00",
+        "updated_at": "2024-01-01 00:00:00",
+        "deleted_at": null,
+        "database_type": "exampledb",
+        "remoteAccess": false,
+        "pma_auto_login": true,
+        "host": "localhost",
+        "server_name": "server_name-sample",
+        "country_code": "XX",
+        "agent_status": "example-agent-status",
+        "created_by_humans": "created_by_humans-sample"
+      },
+      {
+        "id": 1003,
+        "server_id": 1004,
+        "name": "exampledb",
+        "size": 1,
+        "automatic_backup": 1,
+        "created_at": "2024-01-01 00:00:00",
+        "updated_at": "2024-01-01 00:00:00",
+        "deleted_at": null,
+        "database_type": "exampledb",
+        "remoteAccess": false,
+        "pma_auto_login": true,
+        "host": "localhost",
+        "server_name": "server_name-sample",
+        "country_code": "XX",
+        "agent_status": "example-agent-status",
+        "created_by_humans": "created_by_humans-sample"
+      }
+    ],
+    "first_page_url": "https://api.example.test/organizations/1",
+    "from": 1,
+    "last_page": 1,
+    "last_page_url": "https://api.example.test/organizations/1",
+    "links": [
+      {
+        "url": null,
+        "label": "Example label",
+        "active": false
+      },
+      {
+        "url": "https://api.example.test/organizations/1",
+        "label": "Example label",
+        "active": true
+      }
+    ],
+    "next_page_url": null,
+    "path": "https://api.example.test/organizations/1",
+    "per_page": 1,
+    "prev_page_url": null,
+    "to": 1,
+    "total": 1
+  }
+}
