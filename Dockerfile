@@ -49,6 +49,13 @@ RUN mkdir -p storage/app/public storage/framework/cache/data storage/framework/s
     && chown -R www-data:www-data storage bootstrap/cache \
     && rm /usr/bin/composer
 
+# The base image's nginx adds its own X-Frame-Options, X-Content-Type-Options, Referrer-Policy and
+# Strict-Transport-Security to every response, so each of them was sent twice, with different values.
+# The app sets them (App\Http\Middleware\AddSecurityHeaders), so the nginx copies are removed. The
+# grep fails the build if a future base image still adds one.
+RUN sed -i -E '/^add_header[[:space:]]+(X-Frame-Options|X-Content-Type-Options|Referrer-Policy|Strict-Transport-Security)[[:space:]]/d' /etc/nginx/server-opts.d/security.conf \
+    && ! grep -E '^add_header[[:space:]]+(X-Frame-Options|X-Content-Type-Options|Referrer-Policy|Strict-Transport-Security)' /etc/nginx/server-opts.d/security.conf
+
 # Runs at every start, before the web server: checks APP_KEY, creates the OAuth signing keys once, migrates.
 COPY --chmod=755 docker/entrypoint.d/ /etc/entrypoint.d/
 
