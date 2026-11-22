@@ -14,7 +14,7 @@ You will get an acknowledgement, and the fix and a credited advisory once it is 
 
 ## Supported versions
 
-Until 1.0, only the latest commit on the default branch is supported. After 1.0, the latest release.
+Only the latest release is supported. Fixes land on the default branch first.
 
 ## How credentials are protected
 
