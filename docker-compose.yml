@@ -9,7 +9,7 @@ x-app: &app
   image: serveravatar-mcp:local
   restart: unless-stopped
   environment: &app-env
-    APP_KEY: ${APP_KEY:?Set APP_KEY in .env (docker run --rm serveravatar-mcp:local php artisan key:generate --show)}
+    APP_KEY: ${APP_KEY:?Set APP_KEY in .env, for example the output of echo "APP_KEY=base64:$(openssl rand -base64 32)"}
     APP_URL: ${APP_URL:?Set APP_URL in .env to the https address people will open}
     TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
     TRUSTED_HOSTS: ${TRUSTED_HOSTS:-}
