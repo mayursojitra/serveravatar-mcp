@@ -1,5 +1,11 @@
 # ServerAvatar MCP
 
+[![tests](https://github.com/mayursojitra/serveravatar-mcp/actions/workflows/tests.yml/badge.svg)](https://github.com/mayursojitra/serveravatar-mcp/actions/workflows/tests.yml)
+[![lint](https://github.com/mayursojitra/serveravatar-mcp/actions/workflows/lint.yml/badge.svg)](https://github.com/mayursojitra/serveravatar-mcp/actions/workflows/lint.yml)
+[![audit](https://github.com/mayursojitra/serveravatar-mcp/actions/workflows/audit.yml/badge.svg)](https://github.com/mayursojitra/serveravatar-mcp/actions/workflows/audit.yml)
+[![docker](https://github.com/mayursojitra/serveravatar-mcp/actions/workflows/docker.yml/badge.svg)](https://github.com/mayursojitra/serveravatar-mcp/actions/workflows/docker.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 > ServerAvatar MCP is an independent open-source project. It is not affiliated with, endorsed by or sponsored by ServerAvatar.
 
 A self-hosted, multi-user web app that exposes a curated set of [ServerAvatar](https://serveravatar.com) actions to AI clients over MCP, so a team can use its servers without sharing ServerAvatar credentials.
@@ -85,6 +91,7 @@ To run it in containers, see the Docker Compose section of [docs/self-hosting.md
 
 - [docs/setup.md](docs/setup.md) and [docs/self-hosting.md](docs/self-hosting.md): connecting clients and running the app in production.
 - [CONTRIBUTING.md](CONTRIBUTING.md): how to set up, test and submit changes, and the principles the project keeps.
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md): how we expect people to treat each other.
 - [SECURITY.md](SECURITY.md): how to report a vulnerability, how credentials are protected, and a checklist for running it.
 - [docs/oauth.md](docs/oauth.md) and [docs/tools.md](docs/tools.md): how the connection layer works, and the planned tools.
 - Licence: [MIT](LICENSE).
