@@ -1,31 +1,45 @@
-# Weekly update pull requests. Security advisories are handled separately by Dependabot alerts.
+# Monthly update pull requests, minor and patch only. Major versions are ignored for the code
+# dependencies and the Docker image because they have broken the build (TypeScript, ESLint, the Vite
+# plugins) or need a deliberate upgrade with a browser check (Inertia). Upgrade a major by hand when ready.
+# Security advisories are handled separately by Dependabot alerts.
 version: 2
 
 updates:
   - package-ecosystem: composer
     directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 2
     groups:
       php-dependencies:
         update-types: [minor, patch]
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
-    open-pull-requests-limit: 5
+      interval: monthly
+    open-pull-requests-limit: 2
     groups:
       js-dependencies:
         update-types: [minor, patch]
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
 
+  # Actions are versioned by major tag (v6, v7), so ignoring majors here would mean never updating them.
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
 
+  # Keep the Node and PHP base images on the versions the project supports and tests (Node 22).
   - package-ecosystem: docker
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
