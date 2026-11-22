@@ -10,7 +10,7 @@ if [ -n "${SKIP_BOOTSTRAP:-}" ]; then
 fi
 
 if [ -z "${APP_KEY:-}" ]; then
-    echo "APP_KEY is empty. Generate one with: docker run --rm <image> php artisan key:generate --show" >&2
+    echo "APP_KEY is empty. Generate one with: echo \"APP_KEY=base64:\$(openssl rand -base64 32)\"  (or: docker run --rm --entrypoint php <image> artisan key:generate --show)" >&2
     echo "Keep it safe: without it, every saved ServerAvatar token becomes unreadable." >&2
     exit 1
 fi

@@ -88,16 +88,18 @@ With Docker: `git pull && docker compose up -d --build` (the app migrates the da
 The repository has a `Dockerfile` and a `docker-compose.yml`: the app (nginx and PHP-FPM, port 8080), a scheduler container for the daily clean-ups, and MariaDB.
 
 ```bash
-cp .env.docker.example .env          # fill in APP_URL, DB_PASSWORD and, after the next step, APP_KEY
-docker compose build
-docker run --rm serveravatar-mcp:local php artisan key:generate --show   # paste the result as APP_KEY
-docker compose up -d
+cp .env.docker.example .env          # then edit it: APP_URL, DB_PASSWORD and APP_KEY
+echo "APP_KEY=base64:$(openssl rand -base64 32)"    # generate the key; paste this line into .env
+echo "DB_PASSWORD=$(openssl rand -hex 24)"          # and, if you like, a database password
+docker compose up -d --build
 docker compose exec app php artisan serveravatar:create-admin you@example.com --name="Your Name"
 ```
 
+`APP_KEY` must be in `.env` before any `docker compose` command, including the build, or Compose stops with "required variable APP_KEY is missing a value". Generate it once and keep it: it encrypts every saved ServerAvatar token. If you prefer to let Laravel make it, build once with a placeholder key and run `docker run --rm --entrypoint php serveravatar-mcp:local artisan key:generate --show` (without `--entrypoint`, the container refuses to start while `APP_KEY` is empty).
+
 The container speaks plain HTTP on port 8080: put an HTTPS reverse proxy in front of it (nginx, Caddy, Traefik, or your host's panel), send it `X-Forwarded-Proto`, and set `TRUSTED_PROXIES` to the proxy's address. The `storage` volume holds the OAuth signing keys, which the app creates on first start. Back up that volume, the database volume and `APP_KEY` (section 5).
 
-The Docker files are built and smoke-tested by this repository's CI workflow (`.github/workflows/docker.yml`), but the maintainer has not run them by hand yet, and that workflow had not run when this was written. If something does not work, please open an issue.
+The Docker files were run by hand (build, health check, sign-in, saving a token) and are built and smoke-tested by this repository's CI workflow (`.github/workflows/docker.yml`) on every push. If something does not work, please open an issue.
 
 ## ServerAvatar's own IP allowlist
 
@@ -105,7 +107,7 @@ ServerAvatar can limit an API token to certain IP addresses. If you use that, al
 
 ## Checking dependencies
 
-Run `composer audit` and `npm audit` now and then (`composer audit` needs Composer 2.4 or newer). The repository's CI does both every week. One known advisory is accepted on purpose and listed in `composer.json`: see [SECURITY.md](../SECURITY.md).
+Run `composer audit` and `npm audit` now and then (`composer audit` needs Composer 2.4 or newer). The repository's CI does both every week, and both currently report no known vulnerabilities.
 
 ## Security checklist
 
