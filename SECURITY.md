@@ -44,7 +44,6 @@ Until 1.0, only the latest commit on the default branch is supported. After 1.0,
 
 ## Known and accepted
 
-- **phpseclib 4.0.1** has a published advisory (a flaw in parsing encrypted keys, PFX and CMS files that can use a lot of CPU). Laravel Passport pins that exact version, and the app uses phpseclib only in `passport:keys` to create its own signing key, never to read anything a visitor supplies, so it cannot be reached. It is listed in `composer.json` under `config.audit.ignore` and will be removed when Passport allows a fixed version.
 - A client that registers itself for OAuth is always created as a public client without a secret, so client-credentials tokens cannot exist; this is covered by a test.
 - Passport's `POST /oauth/token/refresh` route is still registered. It needs a signed-in browser session and cannot reach `/mcp`.
 

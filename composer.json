@@ -75,11 +75,6 @@
         },
         "preferred-install": "dist",
         "sort-packages": true,
-        "audit": {
-            "ignore": {
-                "PKSA-h7cz-q7zq-mdkt": "GHSA-w3p9-g4p2-h3rr: phpseclib 4.0.1 is pinned exactly by laravel/passport. The flaw (unbounded PBKDF iteration count when parsing encrypted keys, PFX or CMS) is not reachable: the app only uses phpseclib in `passport:keys` to generate its own key. Remove this entry when Passport allows phpseclib 4.0.3 or later."
-            }
-        },
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
