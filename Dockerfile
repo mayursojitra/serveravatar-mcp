@@ -6,8 +6,12 @@
 
 ARG PHP_VERSION=8.3
 
+# The vendor and assets stages produce files that do not depend on the CPU, so they always run on the
+# machine doing the build (--platform=$BUILDPLATFORM). Without it, an arm64 image would run npm and
+# Composer under emulation, which is slow and fragile. Only the last stage is built per platform.
+
 # ---- 1. PHP dependencies (production only) -------------------------------------------------------
-FROM serversideup/php:${PHP_VERSION}-fpm-nginx AS vendor
+FROM --platform=$BUILDPLATFORM serversideup/php:${PHP_VERSION}-fpm-nginx AS vendor
 USER root
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /app
@@ -15,7 +19,7 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction --no-progress
 
 # ---- 2. Front-end build ---------------------------------------------------------------------------
-FROM node:22-alpine AS assets
+FROM --platform=$BUILDPLATFORM node:22-alpine AS assets
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
