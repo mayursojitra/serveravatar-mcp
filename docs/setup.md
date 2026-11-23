@@ -34,6 +34,8 @@ claude mcp add --transport http serveravatar https://your-host/mcp
 
 Then run `/mcp` inside Claude Code, pick `serveravatar` and choose to authenticate. A browser window opens for sign-in and consent.
 
+This was tested end to end against a local install (`http://localhost:8080`, Docker): sign-in, consent, the tool list, `ping` and read tools. It was also tested over a public HTTPS tunnel, where `list_servers` worked. If your Claude Code account also has a claude.ai connector for the same app, either one may answer, so to be sure which one did, look at **All activity**: the client name there is "Claude Code (serveravatar)" for this entry.
+
 ## Cursor
 
 Add the server to `~/.cursor/mcp.json` (or the project's `.cursor/mcp.json`):

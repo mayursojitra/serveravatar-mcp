@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Claude Code tested.** Claude Code connected to a local Docker install over OAuth and listed the tools (25), and `ping`, `list_organizations` and `list_servers` ran through it. It also connected over a public HTTPS tunnel, where `list_servers` worked (reported by the maintainer, not from the activity log). When a call left out a required argument, the tool's error message was enough for the AI to correct it. Cursor is still untested. See [docs/setup.md](docs/setup.md).
+
 ## 1.0.0
 
 First stable release of a self-hosted, multi-user MCP server for ServerAvatar.
