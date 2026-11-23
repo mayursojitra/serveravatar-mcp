@@ -10,7 +10,7 @@
 
 A self-hosted, multi-user web app that exposes a curated set of [ServerAvatar](https://serveravatar.com) actions to AI clients over MCP, so a team can use its servers without sharing ServerAvatar credentials.
 
-**Status: version 1.0.0.** Accounts, OAuth, the MCP endpoint, the activity log and dashboard, the encrypted ServerAvatar token vault, the 16 read-only tools and the 8 tools that change things (restart, supervisors, applications, domains, SSL, databases, database user access, cron jobs) are built and tested. Seven of the eight (restart, create database, create application, add a domain, install SSL, change database user access, create a cron job) were also run on a test server. Of the 14 application types, five were created live (plain PHP, WordPress, phpMyAdmin, Joomla, Statamic); the other nine follow ServerAvatar's documentation and have not been run. The eighth write tool, `control_supervisor`, also follows the documentation only. A security review, a dependency audit and a load test are done (see [SECURITY.md](SECURITY.md)). The Docker setup was run by hand and is built and smoke-tested by CI on every push.
+**Status: version 1.0.1.** Accounts, OAuth, the MCP endpoint, the activity log and dashboard, the encrypted ServerAvatar token vault, the 16 read-only tools and the 8 tools that change things (restart, supervisors, applications, domains, SSL, databases, database user access, cron jobs) are built and tested. Seven of the eight (restart, create database, create application, add a domain, install SSL, change database user access, create a cron job) were also run on a test server. Of the 14 application types, five were created live (plain PHP, WordPress, phpMyAdmin, Joomla, Statamic); the other nine follow ServerAvatar's documentation and have not been run. The eighth write tool, `control_supervisor`, also follows the documentation only. A security review, a dependency audit and a load test are done (see [SECURITY.md](SECURITY.md)). The Docker setup was run by hand and is built and smoke-tested by CI on every push.
 
 See the [changelog](CHANGELOG.md), the [design notes](docs/design.md), [what the live ServerAvatar API does](docs/api-notes.md) and the [tools](docs/tools.md).
 
@@ -85,7 +85,7 @@ Password rules: at least 12 characters with upper and lower case letters and a n
 
 Set `TRUSTED_PROXIES` (comma-separated IPs or CIDR ranges, or `*` only if the app is reachable solely through your own proxy). By default no proxy is trusted, so a forged `X-Forwarded-For` cannot change the IP recorded in the activity log. Whatever you trust, the app only answers to the host in `APP_URL` (plus `TRUSTED_HOSTS`, if set, and `localhost`), so a forged `X-Forwarded-Host` cannot redirect OAuth addresses or password-reset links to another domain.
 
-To run it in containers, see the Docker Compose section of [docs/self-hosting.md](docs/self-hosting.md).
+To run it in containers, see the Docker Compose section of [docs/self-hosting.md](docs/self-hosting.md). Each release is also published as a ready-made image (`ghcr.io/mayursojitra/serveravatar-mcp`, Intel/AMD and ARM), so you can run it without building.
 
 ## Contributing, security and licence
 

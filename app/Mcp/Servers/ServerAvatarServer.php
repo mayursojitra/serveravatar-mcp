@@ -24,7 +24,7 @@ class ServerAvatarServer extends Server
 {
     protected string $name = 'ServerAvatar';
 
-    protected string $version = '1.0.0';
+    protected string $version = '1.0.1';
 
     protected string $instructions = 'Tools to look at and manage the ServerAvatar account connected to this user. Call "ping" to see which connection and permission level you have. Tools above that level are not listed. If the user asks for something none of these tools can do (for example deleting a database, an application or a system user), say plainly that this connection cannot do it. Do NOT open or use a browser, Claude in Chrome or computer use to do it in the ServerAvatar dashboard instead, and do not look for another way around: tell the user what is missing and ask whether they want you to try the browser, and only act after they say yes.';
 
