@@ -1,0 +1,238 @@
+name: release-image
+
+# Builds the Docker image and publishes it to GitHub's container registry (ghcr.io) when a version tag
+# (v1.2.3) is pushed, which is also what creating a release in the GitHub web interface does.
+#
+#   - The tag decides the image tags: 1.2.3 always; 1.2 and latest only for a final release, never for
+#     a pre-release such as v1.0.0-rc.1.
+#   - The image is smoke tested BEFORE anything is pushed, and the pushed image is tested again from an
+#     empty folder (only docker-compose.yml and .env), which is how a self-hoster uses it.
+#   - Manual run (Actions tab, "Run workflow"): give an existing tag to publish an image for it, or
+#     untick "push" for a dry run. Untick "update_latest" when rebuilding an OLDER version, so that
+#     "latest" and "1.2" are not moved backwards.
+#   - On a pull request that touches the Docker files, both CPU platforms are built without pushing,
+#     so a broken arm64 build shows up before a release, not during one.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing release tag to build, for example v1.0.0'
+        required: true
+        type: string
+      push:
+        description: 'Push the image (untick for a dry run)'
+        required: false
+        type: boolean
+        default: true
+      update_latest:
+        description: 'Also move the "1.2" and "latest" tags (untick for an older version)'
+        required: false
+        type: boolean
+        default: true
+  pull_request:
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - docker/**
+      - docker-compose.yml
+      - .github/workflows/release-image.yml
+      - .github/scripts/docker-smoke-test.sh
+
+concurrency:
+  group: release-image-${{ github.event_name }}-${{ inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # Named differently from the "image" job in docker.yml on purpose: that one is a required check,
+  # and two checks with the same name would make the requirement ambiguous.
+  publish:
+    name: publish image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      # Two checkouts. The workflow's own ref (the tag for a release, main for a manual run) supplies the
+      # compose file and the smoke-test script. The code that is built comes from "src": the tag to
+      # release. For a normal release they are the same commit. For a manual run on an older tag (such as
+      # the first image for v1.0.0, which has no smoke-test script or image variable of its own) the
+      # tooling is taken from the current workflow and only the application is taken from the tag.
+      - name: Checkout the workflow's own files
+        uses: actions/checkout@v7
+
+      - name: Checkout the code to build
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          path: src
+
+      - name: Work out the image tags
+        id: meta
+        env:
+          EVENT: ${{ github.event_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_PUSH: ${{ inputs.push }}
+          INPUT_LATEST: ${{ inputs.update_latest }}
+        run: |
+          set -euo pipefail
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+
+          case "$EVENT" in
+            pull_request)      tag="v0.0.0-ci" ;;
+            workflow_dispatch) tag="$INPUT_TAG" ;;
+            *)                 tag="$REF_NAME" ;;
+          esac
+
+          re='^v([0-9]+)\.([0-9]+)\.([0-9]+)(-[0-9A-Za-z.-]+)?$'
+          if ! [[ "$tag" =~ $re ]]; then
+            echo "::error::'$tag' is not a version tag like v1.2.3 or v1.2.3-rc.1"
+            exit 1
+          fi
+          version="${tag#v}"
+          major_minor="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}"
+          prerelease="${BASH_REMATCH[4]}"
+
+          tags="$image:$version"
+          # Moving tags only for a final release, and not when the manual run says it is an older one.
+          if [ -z "$prerelease" ] && [ "$INPUT_LATEST" != "false" ]; then
+            tags="$tags"$'\n'"$image:$major_minor"$'\n'"$image:latest"
+          fi
+
+          publish=false
+          if [ "$EVENT" = "push" ] || { [ "$EVENT" = "workflow_dispatch" ] && [ "$INPUT_PUSH" != "false" ]; }; then
+            publish=true
+          fi
+
+          {
+            echo "image=$image"
+            echo "version=$version"
+            echo "publish=$publish"
+            echo "revision=$(git -C src rev-parse HEAD)"
+            echo "tags<<EOF"
+            echo "$tags"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Event: $EVENT, tag: $tag, push: $publish"
+          echo "Image tags:"
+          echo "$tags"
+
+      - name: Set up QEMU (to build the arm64 image)
+        uses: docker/setup-qemu-action@v4
+        with:
+          platforms: arm64
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v4
+
+      # ---- Pull request or dry run: build both platforms, push nothing ----------------------------
+      - name: Build amd64 and arm64 (no push)
+        if: github.event_name == 'pull_request' || steps.meta.outputs.publish != 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: src
+          platforms: linux/amd64,linux/arm64
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ---- Release: test a candidate first, then push --------------------------------------------
+      - name: Build the candidate image (amd64, kept locally)
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v7
+        with:
+          context: src
+          load: true
+          tags: serveravatar-mcp:candidate
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Prepare settings
+        if: github.event_name != 'pull_request'
+        run: |
+          {
+            echo "APP_URL=https://mcp.example.test"
+            echo "APP_KEY=base64:$(openssl rand -base64 32)"
+            echo "DB_PASSWORD=$(openssl rand -hex 16)"
+          } > .env
+
+      - name: Start the candidate and smoke test it
+        if: github.event_name != 'pull_request'
+        env:
+          SERVERAVATAR_IMAGE: serveravatar-mcp:candidate
+        run: |
+          docker compose up -d
+          bash .github/scripts/docker-smoke-test.sh
+
+      - name: Log in to ghcr.io
+        if: steps.meta.outputs.publish == 'true'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push amd64 and arm64
+        if: steps.meta.outputs.publish == 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: src
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: |
+            org.opencontainers.image.title=ServerAvatar MCP
+            org.opencontainers.image.description=Self-hosted, multi-user MCP server for ServerAvatar
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.url=https://github.com/${{ github.repository }}
+            org.opencontainers.image.licenses=MIT
+            org.opencontainers.image.version=${{ steps.meta.outputs.version }}
+            org.opencontainers.image.revision=${{ steps.meta.outputs.revision }}
+          cache-from: type=gha
+
+      - name: Check that both platforms were published
+        if: steps.meta.outputs.publish == 'true'
+        env:
+          REF: ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          docker buildx imagetools inspect "$REF" | tee inspect.txt
+          grep -q 'linux/amd64' inspect.txt
+          grep -q 'linux/arm64' inspect.txt
+
+      - name: Smoke test the pushed image from an empty folder
+        if: steps.meta.outputs.publish == 'true'
+        env:
+          REF: ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          docker compose down -v
+          dir="$(mktemp -d)"
+          echo "EMPTY_DIR=$dir" >> "$GITHUB_ENV"
+          cp docker-compose.yml "$dir/"
+          cp .env "$dir/.env"
+          echo "SERVERAVATAR_IMAGE=$REF" >> "$dir/.env"
+          cd "$dir"
+          docker compose pull
+          docker compose up -d
+          bash "$GITHUB_WORKSPACE/.github/scripts/docker-smoke-test.sh"
+
+      - name: Show logs on failure
+        if: failure() && github.event_name != 'pull_request'
+        run: |
+          docker compose logs || true
+          if [ -n "${EMPTY_DIR:-}" ]; then (cd "$EMPTY_DIR" && docker compose logs) || true; fi
+
+      - name: Stop
+        if: always() && github.event_name != 'pull_request'
+        run: |
+          docker compose down -v || true
+          if [ -n "${EMPTY_DIR:-}" ]; then (cd "$EMPTY_DIR" && docker compose down -v) || true; fi

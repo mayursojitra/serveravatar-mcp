@@ -81,7 +81,7 @@ php artisan migrate --force
 php artisan config:cache
 ```
 
-With Docker: `git pull && docker compose up -d --build` (the app migrates the database when it starts).
+With Docker, built from source: `git pull && docker compose up -d --build` (the app migrates the database when it starts). With the published image: see [Updating the published image](#updating-the-published-image).
 
 ## Docker Compose
 
@@ -100,6 +100,44 @@ docker compose exec app php artisan serveravatar:create-admin you@example.com --
 The container speaks plain HTTP on port 8080: put an HTTPS reverse proxy in front of it (nginx, Caddy, Traefik, or your host's panel), send it `X-Forwarded-Proto`, and set `TRUSTED_PROXIES` to the proxy's address. The `storage` volume holds the OAuth signing keys, which the app creates on first start. Back up that volume, the database volume and `APP_KEY` (section 5).
 
 The Docker files were run by hand (build, health check, sign-in, saving a token) and are built and smoke-tested by this repository's CI workflow (`.github/workflows/docker.yml`) on every push. If something does not work, please open an issue.
+
+### Run the published image instead of building it
+
+Every release is published as a ready-made image for Intel/AMD and ARM machines (including Apple Silicon) at `ghcr.io/mayursojitra/serveravatar-mcp`. You do not need the source code or a build: only `docker-compose.yml` and a `.env` file.
+
+```bash
+mkdir serveravatar-mcp && cd serveravatar-mcp
+curl -fsSLO https://raw.githubusercontent.com/mayursojitra/serveravatar-mcp/main/docker-compose.yml
+curl -fsSL https://raw.githubusercontent.com/mayursojitra/serveravatar-mcp/main/.env.docker.example -o .env
+```
+
+The compose file on `main` works with every published image: it only passes settings that the images already read. If a release ever needs a change to it, the changelog says so.
+
+Fill in `.env` as in the steps above (generate `APP_KEY` and `DB_PASSWORD` with the two `echo` commands, and set `APP_URL`), and uncomment the image line with the version you chose:
+
+```
+SERVERAVATAR_IMAGE=ghcr.io/mayursojitra/serveravatar-mcp:1.0.0
+```
+
+Then:
+
+```bash
+docker compose pull
+docker compose up -d
+docker compose exec app php artisan serveravatar:create-admin you@example.com --name="Your Name"
+```
+
+**Pin a version.** Use an exact version (`:1.0.0`) or a minor line (`:1.0`, which gets fixes only), not `:latest`. The app migrates its database every time a new version starts, so `latest` can change your database schema without you asking for it. Pre-releases (such as `1.1.0-rc.1`) are published under their exact version only, never under `1.1` or `latest`.
+
+#### Updating the published image
+
+1. Read the [changelog](../CHANGELOG.md) for the new version, and back up the database volume and `APP_KEY` first (section 5).
+2. Change the version in `SERVERAVATAR_IMAGE` in `.env`.
+3. Run `docker compose pull && docker compose up -d`.
+
+If `docker compose pull` answers "not found" or "denied", check the image name and version for typos. If you have no `SERVERAVATAR_IMAGE` line, Compose tries to build from source and stops because there is no `Dockerfile` next to it.
+
+Each release image is smoke tested before it is published, and again after it is pulled into an empty folder, on Intel/AMD. The ARM image is built for every release, and its build is checked on pull requests, but nobody runs it automatically yet. If it misbehaves on your ARM machine, please open an issue.
 
 ## ServerAvatar's own IP allowlist
 

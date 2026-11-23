@@ -25,36 +25,8 @@ jobs:
       - name: Build and start
         run: docker compose up -d --build
 
-      - name: Wait until the app is healthy
-        run: |
-          for i in $(seq 1 60); do
-            if curl -fsS http://localhost:8080/up > /dev/null; then exit 0; fi
-            sleep 3
-          done
-          echo "The app did not become healthy in time." >&2
-          docker compose logs
-          exit 1
-
-      - name: Smoke test
-        run: |
-          set -e
-          # The sign-in page answers on the configured host.
-          curl -fsS -H 'Host: mcp.example.test' http://localhost:8080/login | grep -q 'Sign in\|Log in\|email'
-          # Discovery names the configured host.
-          curl -fsS -H 'Host: mcp.example.test' http://localhost:8080/.well-known/oauth-authorization-server | grep -q 'mcp.example.test'
-          # Another host is refused.
-          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: evil.example' http://localhost:8080/login)" = "400"
-          # /mcp wants a token.
-          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST -H 'Host: mcp.example.test' -H 'Content-Type: application/json' -d '{}' http://localhost:8080/mcp)" = "401"
-          # Framing is forbidden.
-          curl -sI -H 'Host: mcp.example.test' http://localhost:8080/login | grep -qi '^x-frame-options: deny'
-          # Each security header is sent exactly once (nginx in the image must not add a second copy).
-          for h in x-frame-options x-content-type-options referrer-policy; do
-            test "$(curl -sI -H 'Host: mcp.example.test' http://localhost:8080/login | grep -ci "^$h:")" = "1"
-          done
-          # The database was migrated, and the scheduler container is running.
-          docker compose exec -T app php artisan migrate:status | grep -q 'Ran'
-          docker compose ps --status running --services | grep -q scheduler
+      - name: Wait until the app is healthy, then smoke test
+        run: bash .github/scripts/docker-smoke-test.sh
 
       - name: Show logs on failure
         if: failure()

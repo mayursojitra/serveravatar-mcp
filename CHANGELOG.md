@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Published Docker image.** Each release is now published to `ghcr.io/mayursojitra/serveravatar-mcp` for Intel/AMD and ARM, so self-hosters can run it with only `docker-compose.yml` and a `.env` file, no build. Set `SERVERAVATAR_IMAGE` in `.env` to a pinned version (`:1.0.0` or `:1.0`; `latest` can migrate your database on its own) and run `docker compose pull && docker compose up -d`. Pre-releases get only their exact version tag. A new workflow (`release-image.yml`) smoke tests the image before pushing it and again from an empty folder after, and builds both platforms on pull requests that touch the Docker files. The docker CI and the release workflow share one smoke-test script. The Dockerfile's PHP-dependency and front-end stages now always run on the build machine, so the ARM image does not run npm or Composer under emulation. See [docs/self-hosting.md](docs/self-hosting.md).
 - **Claude Code tested.** Claude Code connected to a local Docker install over OAuth and listed the tools (25), and `ping`, `list_organizations` and `list_servers` ran through it. It also connected over a public HTTPS tunnel, where `list_servers` worked (reported by the maintainer, not from the activity log). When a call left out a required argument, the tool's error message was enough for the AI to correct it. Cursor is still untested. See [docs/setup.md](docs/setup.md).
 
 ## 1.0.0

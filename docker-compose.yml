@@ -3,10 +3,14 @@
 #   2. docker compose up -d --build
 #   3. docker compose exec app php artisan serveravatar:create-admin you@example.com
 # Put an HTTPS reverse proxy in front of port 8080 (see docs/self-hosting.md).
+#
+# To run the published image instead of building it, set SERVERAVATAR_IMAGE in .env, for example
+#   SERVERAVATAR_IMAGE=ghcr.io/mayursojitra/serveravatar-mcp:1.0
+# and use `docker compose pull && docker compose up -d` (no build, no source checkout needed).
 
 x-app: &app
   build: .
-  image: serveravatar-mcp:local
+  image: ${SERVERAVATAR_IMAGE:-serveravatar-mcp:local}
   restart: unless-stopped
   environment: &app-env
     APP_KEY: ${APP_KEY:?Set APP_KEY in .env, for example the output of echo "APP_KEY=base64:$(openssl rand -base64 32)"}
