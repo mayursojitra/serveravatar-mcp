@@ -52,7 +52,7 @@ Then open http://localhost:8000 and sign in. The admin creates users from **Admi
 
 ## Connecting an AI client
 
-Step-by-step guides for claude.ai, Claude Code and Cursor, and what to do when something goes wrong, are in [docs/setup.md](docs/setup.md). To run the app for a team, see [docs/self-hosting.md](docs/self-hosting.md). In short:
+Step-by-step guides for claude.ai, Claude Code and Cursor, and what to do when something goes wrong, are in [docs/setup.md](docs/setup.md). To run the app for a team, see [docs/self-hosting.md](docs/self-hosting.md). An optional [skill](skills/serveravatar-mcp/SKILL.md) teaches the AI to use the tools well. In short:
 
 On the **Connections** page the app shows its MCP address (`…/mcp`). In claude.ai: Settings → Connectors → Add custom connector, paste the address. In Claude Code: `claude mcp add --transport http serveravatar <address>`, then `/mcp` to sign in. The client opens this app's sign-in and consent pages; after approval, ask Claude something like “list my servers” to check the connection. If you connected before the tools were added, remove and re-add the connector so the client reloads the tool list.
 
