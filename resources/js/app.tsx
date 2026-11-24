@@ -10,6 +10,13 @@ declare global {
     const route: typeof routeFn;
 }
 
+// The UI library that locks page scrolling (used by dialogs and menus) adds a <style> tag at runtime. It
+// reads this global to put the page's CSP nonce on that tag, otherwise the browser would refuse the styles.
+const cspNonce = document.querySelector<HTMLMetaElement>('meta[name="csp-nonce"]')?.content;
+if (cspNonce) {
+    (window as unknown as { __webpack_nonce__?: string }).__webpack_nonce__ = cspNonce;
+}
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
@@ -20,8 +27,9 @@ createInertiaApp({
 
         root.render(<App {...props} />);
     },
+    // The progress bar's styles live in app.css: Inertia's own <style> tag has no CSP nonce and would be blocked.
     progress: {
-        color: '#4B5563',
+        includeCSS: false,
     },
 });
 

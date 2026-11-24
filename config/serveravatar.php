@@ -42,6 +42,12 @@ return [
     */
     'trusted_hosts' => array_values(array_filter(array_map('trim', explode(',', (string) env('TRUSTED_HOSTS', ''))))),
 
+    /*
+    | Content-Security-Policy for pages: "enforce" (default), "report-only" (the browser only logs
+    | violations in its console) or "off". Frame blocking is always on. See AddSecurityHeaders.
+    */
+    'csp' => env('CSP_MODE', 'enforce'),
+
     // Activity log rows older than this many days are pruned by `activity:prune` (FR-18).
     'activity_retention_days' => (int) env('ACTIVITY_LOG_RETENTION_DAYS', 90),
 

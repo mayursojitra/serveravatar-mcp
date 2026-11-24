@@ -38,6 +38,11 @@ curl -sI -H "Host: $HOST" "$BASE/login" | grep -qi '^x-frame-options: deny'
 for h in x-frame-options x-content-type-options referrer-policy; do
   test "$(curl -sI -H "Host: $HOST" "$BASE/login" | grep -ci "^$h:")" = "1"
 done
+# Pages carry a script/style policy with a nonce, sent once, and none that blocks the consent redirect.
+csp="$(curl -sI -H "Host: $HOST" "$BASE/login" | grep -i '^content-security-policy:')"
+test "$(printf '%s\n' "$csp" | wc -l | tr -d ' ')" = "1"
+printf '%s' "$csp" | grep -q "script-src 'self' 'nonce-"
+if printf '%s' "$csp" | grep -qi 'form-action'; then echo 'CSP must not set form-action'; exit 1; fi
 # The database was migrated, and the scheduler container is running.
 docker compose exec -T app php artisan migrate:status | grep -q 'Ran'
 docker compose ps --status running --services | grep -q scheduler
