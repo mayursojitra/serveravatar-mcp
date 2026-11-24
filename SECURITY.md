@@ -28,7 +28,7 @@ Only the latest release is supported. Fixes land on the default branch first.
 | Activity log | Every sign-in, admin action and MCP request is recorded with the user, client and result. Tool arguments are stored with secrets removed (tokens, passwords, authorization headers, and similar keys) and long values cut. Rows are kept 90 days. |
 | Redirects | An AI client can only be sent back to addresses in `MCP_REDIRECT_DOMAINS` (claude.ai, claude.com and localhost by default). `*` is never a default. |
 | Which address it answers to | Every request must name the host in `APP_URL` (or one listed in `TRUSTED_HOSTS`, or `localhost`); anything else gets `400`. Without this, a forged `Host` or `X-Forwarded-Host` header could make the app write a visitor's chosen domain into OAuth discovery documents and into the link of a password-reset e-mail. Reverse proxies and tunnels pass those headers through, so trusting the proxy does not prevent it. |
-| Browser protections | Every response forbids framing (`X-Frame-Options: DENY` and `frame-ancestors 'none'`), so the consent page cannot be loaded invisibly inside another site; it also sets `X-Content-Type-Options`, `Referrer-Policy` and, over HTTPS, `Strict-Transport-Security`. A full script and style Content-Security-Policy is not set yet. |
+| Browser protections | Every response forbids framing (`X-Frame-Options: DENY` and `frame-ancestors 'none'`), so the consent page cannot be loaded invisibly inside another site; it also sets `X-Content-Type-Options`, `Referrer-Policy` and, over HTTPS, `Strict-Transport-Security`. Pages also carry a Content-Security-Policy: scripts and styles run only if they come from the app itself or carry a one-time code (nonce) made for that request, fonts and images come from the app only, and plugins are off, so an injected `<script>` or `<style>` tag does not run. It has no `form-action` rule on purpose, because the consent page must be able to send you back to your AI client's own address. A page that fails with a server error shows Laravel's plain error page, whose inline styles the policy blocks, so it appears unstyled. Set `CSP_MODE=report-only` to have the browser only log problems, or `off` to drop the page policy (framing stays banned). |
 | Abuse limits | Login attempts are limited per email and IP, and per IP. `/mcp` is limited per user, and open client registration is limited per IP. |
 
 ## If you run it, please do these
@@ -50,7 +50,6 @@ Only the latest release is supported. Fixes land on the default branch first.
 ## Not covered yet
 
 - No independent penetration test has been done. v1.0 has had a code review by its author, a dependency audit, and the automated tests, nothing more.
-- No full Content-Security-Policy for scripts and styles.
 
 - The 8 tools that change things (restart, supervisors, applications, domains, SSL, databases, database user access, cron jobs) are tested against a faked ServerAvatar, and seven (restart, create database, create application, add a domain, install SSL, change database user access, create a cron job) were also run on a test server. The other one, `control_supervisor`, follows ServerAvatar's documentation and has not been run live.
 - Two-factor sign-in.

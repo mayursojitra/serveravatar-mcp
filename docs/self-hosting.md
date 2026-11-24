@@ -33,6 +33,7 @@ The admin command asks for a password on a hidden prompt (or reads `ADMIN_PASSWO
 | `APP_DEBUG` | `false`. Debug mode shows stack traces and request data to visitors. |
 | `APP_URL` | The public address, with `https://`. The app answers **only** to this host (and `localhost`): a request that names any other host gets `400 Invalid host`. If you change the address, change this too. |
 | `TRUSTED_HOSTS` | Extra hostnames the app may be opened at, comma-separated. Usually empty. |
+| `CSP_MODE` | Content-Security-Policy for pages: `enforce` (default), `report-only` (the browser only logs problems in its console) or `off`. Leave it alone unless a page breaks. |
 | `SESSION_SECURE_COOKIE` | `true`, so the session cookie is only ever sent over HTTPS. |
 | `DB_*` | Your database. Use a user that can only reach this database. |
 | `TRUSTED_PROXIES` | The IP address(es) of your reverse proxy, comma-separated. Leave it empty if there is no proxy. Use `*` only if the app is reachable solely through your own proxy. |
