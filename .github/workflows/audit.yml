@@ -9,6 +9,10 @@ on:
     # New advisories appear without any code change, so check weekly too.
     - cron: '17 5 * * 1'
 
+# Read-only token: these jobs only check out and test the code.
+permissions:
+  contents: read
+
 jobs:
   dependencies:
     runs-on: ubuntu-latest
