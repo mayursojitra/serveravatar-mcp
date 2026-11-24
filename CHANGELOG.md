@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 1.0.2
+
+A patch release. Pages now carry a Content-Security-Policy, and the font is served by the app instead of fonts.bunny.net, so no browser request leaves your server. Tools, accounts and the database are unchanged: there are no migrations, and the Docker image upgrades with `docker compose pull && docker compose up -d`. If a page ever looks broken after the upgrade, set `CSP_MODE=report-only` (or `off`) and tell us.
 
 - **Companion skill and release notes.** `skills/serveravatar-mcp/SKILL.md` is an optional instruction file for Claude (how to start, what to ask before a change, confirm before a restart even when asked, what the tools cannot do), described in [docs/setup.md](docs/setup.md). Tried through Claude Code with real prompts: it refused a delete plainly, asked for every choice before creating a database or a WordPress site, and held back a restart until it had looked at the server. `.github/release.yml` groups GitHub's generated release notes by pull-request label.
 - **CI tokens are read-only.** The `tests`, `lint`, `audit` and `docker` workflows now declare `permissions: contents: read`, which closes four GitHub code-scanning alerts ("Workflow does not contain permissions").
