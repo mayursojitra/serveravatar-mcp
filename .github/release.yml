@@ -1,0 +1,29 @@
+# Groups the notes GitHub generates for a release ("Generate release notes" in the release form).
+# Label a pull request to put it in a group; the maintainers' own release notes can still be edited by hand.
+changelog:
+  exclude:
+    labels:
+      - skip-changelog
+    authors:
+      - dependabot
+  categories:
+    - title: Security
+      labels:
+        - security
+    - title: New
+      labels:
+        - enhancement
+        - feature
+    - title: Fixes
+      labels:
+        - bug
+    - title: Documentation
+      labels:
+        - documentation
+    - title: Dependencies and CI
+      labels:
+        - dependencies
+        - ci
+    - title: Other changes
+      labels:
+        - "*"

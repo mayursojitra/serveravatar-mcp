@@ -52,6 +52,13 @@ Then open Cursor's MCP settings and connect it. Cursor opens your browser for si
 
 This was tested end to end against a local install (`http://localhost:8080`, Docker): sign-in, consent, the tool list (25 tools), `ping` and `list_organizations`. Each of those shows in **All activity** with the client name "Cursor". Cursor registers itself again on every connect, so the Connections page may show more than one "Cursor" client; they are harmless.
 
+## An optional skill for better answers
+
+[`skills/serveravatar-mcp/SKILL.md`](../skills/serveravatar-mcp/SKILL.md) is a short instruction file for the AI that explains how to use these tools well: start with `list_organizations`, ask before anything that changes a server (and confirm once more before a restart, a supervisor action, a database-user change or a cron job, even when you asked for it), look at a slow server before suggesting a restart, ask the user for the choices it must not invent (domain, database name, who may connect), warn that `update_database_user` resets a password, and say plainly what the tools cannot do instead of opening a browser. The server already tells the AI most of this, so the skill is optional.
+
+- **Claude Code:** copy the folder to `~/.claude/skills/serveravatar-mcp/` (or into a project's `.claude/skills/`).
+- **claude.ai:** zip the `serveravatar-mcp` folder and upload it under Settings, Capabilities, Skills.
+
 ## If something goes wrong
 
 - **The page says `400 Invalid host`.** The address in the browser or connector is not the one in `APP_URL` (or `TRUSTED_HOSTS`). Fix `APP_URL` in `.env` (a tunnel address changes every time the tunnel restarts) and run `php artisan config:clear`.
