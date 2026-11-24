@@ -1,3 +1,6 @@
+@import '@fontsource/instrument-sans/latin-400.css';
+@import '@fontsource/instrument-sans/latin-500.css';
+@import '@fontsource/instrument-sans/latin-600.css';
 @import 'tailwindcss';
 
 @plugin 'tailwindcss-animate';
@@ -155,4 +158,32 @@
     body {
         @apply bg-background text-foreground;
     }
+}
+
+/* Inertia's page-loading bar (its default styles are not injected, see resources/js/app.tsx). */
+#nprogress {
+    pointer-events: none;
+}
+
+#nprogress .bar {
+    background: #4b5563;
+    position: fixed;
+    z-index: 1031;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+}
+
+#nprogress .peg {
+    display: block;
+    position: absolute;
+    right: 0;
+    width: 100px;
+    height: 100%;
+    box-shadow:
+        0 0 10px #4b5563,
+        0 0 5px #4b5563;
+    opacity: 1;
+    transform: rotate(3deg) translate(0, -4px);
 }

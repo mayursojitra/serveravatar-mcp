@@ -48,9 +48,9 @@ Add the server to `~/.cursor/mcp.json` (or the project's `.cursor/mcp.json`):
 }
 ```
 
-Then open Cursor's MCP settings and connect it. Cursor finishes sign-in with a `cursor://` link, which the app allows by default (`MCP_CUSTOM_SCHEMES`).
+Then open Cursor's MCP settings and connect it. Cursor opens your browser for sign-in and returns through a local address (`http://localhost:8787/callback` in our test), so the sign-in page must be opened on the same computer that runs Cursor. The app also allows `cursor://` links by default (`MCP_CUSTOM_SCHEMES`), in case a Cursor version uses one.
 
-> Cursor has not been tested with this app yet. If it does not connect, please open an issue with what you see.
+This was tested end to end against a local install (`http://localhost:8080`, Docker): sign-in, consent, the tool list (25 tools), `ping` and `list_organizations`. Each of those shows in **All activity** with the client name "Cursor". Cursor registers itself again on every connect, so the Connections page may show more than one "Cursor" client; they are harmless.
 
 ## If something goes wrong
 
