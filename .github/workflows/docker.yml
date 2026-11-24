@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, develop]
 
+# Read-only token: these jobs only check out and test the code.
+permissions:
+  contents: read
+
 jobs:
   image:
     runs-on: ubuntu-latest
