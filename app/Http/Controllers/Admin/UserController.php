@@ -6,6 +6,7 @@ use App\Enums\ActivityKind;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Account\AccountAccess;
+use App\Services\Account\TwoFactor;
 use App\Services\Mcp\ConnectionRevoker;
 use App\Support\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
@@ -38,6 +39,7 @@ class UserController extends Controller
                 'role' => $u->role,
                 'disabled' => $u->disabled,
                 'must_change_password' => $u->must_change_password,
+                'two_factor_enabled' => $u->hasTwoFactorEnabled(),
                 // Whether a token is saved. Admins never see the token itself, nor its last characters (FR-3).
                 'has_token' => (bool) $u->sa_token_exists,
                 'created_at' => $u->created_at->toIso8601String(),
@@ -125,6 +127,22 @@ class UserController extends Controller
         ]);
 
         return back()->with('status', 'Password reset. They must set a new one at next sign-in, and their connected AI clients were disconnected.');
+    }
+
+    /** For a user who lost their authenticator app and recovery codes: turns two-factor sign-in off and signs them out everywhere. */
+    public function resetTwoFactor(Request $request, User $user, TwoFactor $twoFactor): RedirectResponse
+    {
+        $this->ensureManageable($user);
+
+        abort_unless($user->hasTwoFactorEnabled() || $user->two_factor_secret !== null, 404);
+
+        $twoFactor->reset($user);
+
+        ActivityLogger::log(ActivityKind::AdminTwoFactorReset, user: $request->user(), fields: [
+            'meta' => ['target_user_id' => $user->id, 'target_email' => $user->email],
+        ]);
+
+        return back()->with('status', 'Two-factor sign-in was turned off for this user, and they were signed out everywhere. They can set it up again after signing in.');
     }
 
     public function destroy(Request $request, User $user): RedirectResponse

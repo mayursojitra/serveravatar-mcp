@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Two-factor sign-in.** Users can turn on an authenticator app (TOTP) under **Settings → Two-factor**: scan a QR code (drawn by the app, so no outside service sees the secret), confirm with a first code, and save 8 single-use recovery codes. After the password, sign-in then asks for a code before anything else is reachable; connecting an AI client starts with signing in, so new connections are covered too. A code works once, wrong codes are limited, the secret is stored encrypted and the recovery codes only as hashes. Optional per user; set `REQUIRE_TWO_FACTOR=true` to make it mandatory (users without it can reach only the setup page). A user who lost their app is reset by an admin on **Admin → Users**, or by `php artisan serveravatar:reset-two-factor <email>`, which also works for admins. A password reset does not skip the second step. Migration: adds three columns to `users` and a `two_factor_recovery_codes` table. Changing `APP_KEY` makes saved secrets unreadable: reset two-factor for those users afterwards. See [SECURITY.md](SECURITY.md).
+
 ## 1.0.2
 
 A patch release. Pages now carry a Content-Security-Policy, and the font is served by the app instead of fonts.bunny.net, so no browser request leaves your server. Tools, accounts and the database are unchanged: there are no migrations, and the Docker image upgrades with `docker compose pull && docker compose up -d`. If a page ever looks broken after the upgrade, set `CSP_MODE=report-only` (or `off`) and tell us.

@@ -43,34 +43,40 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Attempt to authenticate the request's credentials. Every failure is recorded in the activity log.
+     * Check the email and password and return the user, without signing anyone in. The caller decides
+     * what happens next: sign in at once, or ask for the second factor first. Every failure is recorded
+     * in the activity log.
      *
      * @throws ValidationException
      */
-    public function authenticate(): void
+    public function authenticate(): User
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $provider = Auth::guard('web')->getProvider();
+        $credentials = $this->only('email', 'password');
+        $user = $provider->retrieveByCredentials($credentials);
+
+        if (! $user instanceof User || ! $provider->validateCredentials($user, $credentials)) {
             $this->hit();
             $this->logFailure('invalid_credentials');
 
             throw ValidationException::withMessages(['email' => __('auth.failed')]);
         }
 
-        /** @var User $user */
-        $user = Auth::user();
-
         // A disabled account is refused at sign-in, not only on its next request (FR-2).
         if ($user->disabled) {
-            Auth::logout();
             $this->hit();
             $this->logFailure('disabled', $user);
 
             throw ValidationException::withMessages(['email' => 'This account has been disabled.']);
         }
 
+        $provider->rehashPasswordIfRequired($user, $credentials);
+
         RateLimiter::clear($this->throttleKey());
+
+        return $user;
     }
 
     /**

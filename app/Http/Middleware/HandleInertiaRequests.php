@@ -24,7 +24,9 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 // Only what the UI needs, never the whole model.
-                'user' => $request->user()?->only(['id', 'name', 'email', 'role', 'must_change_password']),
+                'user' => $request->user()
+                    ? [...$request->user()->only(['id', 'name', 'email', 'role', 'must_change_password']), 'two_factor_enabled' => $request->user()->hasTwoFactorEnabled()]
+                    : null,
             ],
             'flash' => [
                 'status' => fn () => $request->session()->get('status'),

@@ -50,6 +50,8 @@ Then open http://localhost:8000 and sign in. The admin creates users from **Admi
 
 `serveravatar:create-admin` refuses an email that already exists, so an existing account can never be turned into an admin.
 
+Every user can turn on two-factor sign-in (an authenticator app plus recovery codes) under **Settings → Two-factor**; `REQUIRE_TWO_FACTOR=true` makes it mandatory. A user who loses their app is reset by an admin on **Admin → Users**, or with `php artisan serveravatar:reset-two-factor you@example.com`.
+
 ## Connecting an AI client
 
 Step-by-step guides for claude.ai, Claude Code and Cursor, and what to do when something goes wrong, are in [docs/setup.md](docs/setup.md). To run the app for a team, see [docs/self-hosting.md](docs/self-hosting.md). An optional [skill](skills/serveravatar-mcp/SKILL.md) teaches the AI to use the tools well. In short:

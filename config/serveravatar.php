@@ -48,6 +48,12 @@ return [
     */
     'csp' => env('CSP_MODE', 'enforce'),
 
+    /*
+    | When true, every user must set up two-factor sign-in: until they do, they can reach only the
+    | security settings page. Off by default, so each user decides for themselves.
+    */
+    'require_two_factor' => (bool) env('REQUIRE_TWO_FACTOR', false),
+
     // Activity log rows older than this many days are pruned by `activity:prune` (FR-18).
     'activity_retention_days' => (int) env('ACTIVITY_LOG_RETENTION_DAYS', 90),
 

@@ -62,7 +62,7 @@ A self-hostable, multi-user web app that exposes a **curated set of ServerAvatar
 - NFR-5 Works with claude.ai, Claude Desktop and Claude Code, and Cursor, over OAuth.
 - NFR-6 Tests: unit, API contract tests built from real captured fixtures, MCP integration tests.
 - NFR-7 Behind a reverse proxy, trusted proxies are configured so the client IP in the activity log is real and cannot be forged (tested).
-- NFR-8 The portal is public, so: HTTPS only, login rate limiting and strong password rules. Two-factor sign-in is deferred to a later version.
+- NFR-8 The portal is public, so: HTTPS only, login rate limiting and strong password rules. Two-factor sign-in (authenticator app and recovery codes) was added in v1.1.
 
 ## Out of scope for v1
 

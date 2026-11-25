@@ -29,7 +29,8 @@ Only the latest release is supported. Fixes land on the default branch first.
 | Redirects | An AI client can only be sent back to addresses in `MCP_REDIRECT_DOMAINS` (claude.ai, claude.com and localhost by default). `*` is never a default. |
 | Which address it answers to | Every request must name the host in `APP_URL` (or one listed in `TRUSTED_HOSTS`, or `localhost`); anything else gets `400`. Without this, a forged `Host` or `X-Forwarded-Host` header could make the app write a visitor's chosen domain into OAuth discovery documents and into the link of a password-reset e-mail. Reverse proxies and tunnels pass those headers through, so trusting the proxy does not prevent it. |
 | Browser protections | Every response forbids framing (`X-Frame-Options: DENY` and `frame-ancestors 'none'`), so the consent page cannot be loaded invisibly inside another site; it also sets `X-Content-Type-Options`, `Referrer-Policy` and, over HTTPS, `Strict-Transport-Security`. Pages also carry a Content-Security-Policy: scripts and styles run only if they come from the app itself or carry a one-time code (nonce) made for that request, fonts and images come from the app only, and plugins are off, so an injected `<script>` or `<style>` tag does not run. It has no `form-action` rule on purpose, because the consent page must be able to send you back to your AI client's own address. A page that fails with a server error shows Laravel's plain error page, whose inline styles the policy blocks, so it appears unstyled. Set `CSP_MODE=report-only` to have the browser only log problems, or `off` to drop the page policy (framing stays banned). |
-| Abuse limits | Login attempts are limited per email and IP, and per IP. `/mcp` is limited per user, and open client registration is limited per IP. |
+| Two-factor sign-in | Optional per user (an authenticator app, TOTP), mandatory for everyone with `REQUIRE_TWO_FACTOR=true`. After the right password nobody is signed in yet: the session holds only the user's id for 5 minutes, and no page is reachable until a valid code or recovery code is entered. Because connecting an AI client starts with signing in, it also protects new connections. A code works once (the step it belongs to is saved with a conditional update, so two simultaneous requests cannot both pass), wrong codes are limited per user and IP, per user, and per IP, and five wrong codes on one sign-in send the user back to the password. The secret is stored encrypted with the app key; the 8 recovery codes are stored only as keyed hashes and each works once. Turning it on signs the user out of other browsers; turning it off, making new codes and starting a setup ask for the password again. A password reset does not skip it. If a user loses their app and codes, an admin can turn it off for them on **Admin → Users**, and `php artisan serveravatar:reset-two-factor <email>` does the same for anyone including admins; there is deliberately no email link, which would make it only as strong as the mailbox. Changing `APP_KEY` makes saved secrets unreadable, so reset two-factor for those users afterwards. Not offered yet: passkeys, SMS or email codes, remember-this-device. |
+| Abuse limits | Login attempts are limited per email and IP, and per IP; wrong two-factor codes have their own limits. `/mcp` is limited per user, and open client registration is limited per IP. |
 
 ## If you run it, please do these
 
@@ -38,7 +39,7 @@ Only the latest release is supported. Fixes land on the default branch first.
 - Back up `APP_KEY` safely. Without it, stored tokens cannot be read; with it and a database dump, they can. Treat both as secrets.
 - Keep the Passport signing keys (`storage/oauth-*.key`, or `PASSPORT_PRIVATE_KEY` and `PASSPORT_PUBLIC_KEY`) private, and do not commit them.
 - Set `TRUSTED_PROXIES` to your reverse proxy's address, not `*`, unless the app can only be reached through that proxy. Otherwise a caller can forge the IP written to the activity log.
-- Use a long, unique password for admin accounts. Two-factor sign-in is not available yet.
+- Use a long, unique password for admin accounts, and turn on two-factor sign-in for them (**Settings → Two-factor**). Set `REQUIRE_TWO_FACTOR=true` to make it mandatory for everyone.
 - Optionally, restrict each ServerAvatar API token to your server's IP address in ServerAvatar, so a stolen token is useless elsewhere.
 - Review **All activity** now and then, and keep dependencies up to date.
 
@@ -52,7 +53,6 @@ Only the latest release is supported. Fixes land on the default branch first.
 - No independent penetration test has been done. v1.0 has had a code review by its author, a dependency audit, and the automated tests, nothing more.
 
 - The 8 tools that change things (restart, supervisors, applications, domains, SSL, databases, database user access, cron jobs) are tested against a faked ServerAvatar, and seven (restart, create database, create application, add a domain, install SSL, change database user access, create a cron job) were also run on a test server. The other one, `control_supervisor`, follows ServerAvatar's documentation and has not been run live.
-- Two-factor sign-in.
 - Destructive tools (delete, restore): deliberately not offered in v1.
 
 ## Third-party notice

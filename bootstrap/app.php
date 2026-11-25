@@ -3,6 +3,7 @@
 use App\Http\Middleware\AddSecurityHeaders;
 use App\Http\Middleware\EnsureMustChangePassword;
 use App\Http\Middleware\EnsureTrustedHost;
+use App\Http\Middleware\EnsureTwoFactorIsSetUp;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -37,12 +38,14 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
             EnsureUserIsActive::class,
             EnsureMustChangePassword::class,
+            EnsureTwoFactorIsSetUp::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // A failed save redirects back with the old input. The ServerAvatar token must never be flashed
-        // into the session, where it would sit in plain text in the sessions table.
-        $exceptions->dontFlash(['token']);
+        // into the session, where it would sit in plain text in the sessions table. The same goes for a
+        // wrong two-factor code or recovery code.
+        $exceptions->dontFlash(['token', 'code', 'recovery_code']);
 
         // Machine endpoints always answer in JSON. Without this, a client that lists text/event-stream
         // before application/json would get a redirect to /login instead of the 401 that starts its

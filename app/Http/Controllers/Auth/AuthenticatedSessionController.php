@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Enums\ActivityKind;
+use App\Http\Controllers\Concerns\CompletesSignIn;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Support\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +14,8 @@ use Inertia\Response;
 
 class AuthenticatedSessionController extends Controller
 {
+    use CompletesSignIn;
+
     public function create(Request $request): Response
     {
         return Inertia::render('auth/login', [
@@ -25,13 +26,22 @@ class AuthenticatedSessionController extends Controller
 
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        $user = $request->authenticate();
 
-        $request->session()->regenerate();
+        // The password is right, but nobody is signed in yet: a user with two-factor sign-in must pass the
+        // challenge first. Only the user's id is kept in the session meanwhile, and only for a few minutes.
+        if ($user->hasTwoFactorEnabled()) {
+            $request->session()->put(TwoFactorChallengeController::SESSION_KEY, [
+                'id' => $user->id,
+                'remember' => $request->boolean('remember'),
+                'at' => now()->getTimestamp(),
+                'failures' => 0,
+            ]);
 
-        ActivityLogger::log(ActivityKind::AuthLogin, user: Auth::user());
+            return redirect()->route('two-factor.challenge');
+        }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return $this->completeSignIn($request, $user, $request->boolean('remember'));
     }
 
     public function destroy(Request $request): RedirectResponse
