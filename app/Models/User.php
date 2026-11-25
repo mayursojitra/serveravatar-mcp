@@ -43,6 +43,7 @@ class User extends Authenticatable implements OAuthenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
     ];
 
     /**
@@ -54,12 +55,28 @@ class User extends Authenticatable implements OAuthenticatable
             'password' => 'hashed',
             'disabled' => 'boolean',
             'must_change_password' => 'boolean',
+            // Encrypted with APP_KEY. Rotating APP_KEY makes every saved secret unreadable, so
+            // two-factor sign-in must be reset for everyone afterwards (see docs/self-hosting.md).
+            'two_factor_secret' => 'encrypted',
+            'two_factor_confirmed_at' => 'datetime',
         ];
     }
 
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;
+    }
+
+    /** True once the user confirmed their authenticator app. A setup that was started but not confirmed does not count. */
+    public function hasTwoFactorEnabled(): bool
+    {
+        return $this->two_factor_secret !== null && $this->two_factor_confirmed_at !== null;
+    }
+
+    /** @return HasMany<TwoFactorRecoveryCode, $this> */
+    public function recoveryCodes(): HasMany
+    {
+        return $this->hasMany(TwoFactorRecoveryCode::class);
     }
 
     /** @return HasOne<SaToken, $this> */

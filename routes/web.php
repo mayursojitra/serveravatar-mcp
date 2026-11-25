@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
             Route::post('users', [AdminUserController::class, 'store'])->name('users.store');
             Route::patch('users/{user}', [AdminUserController::class, 'update'])->name('users.update');
             Route::post('users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('users.reset-password');
+            Route::post('users/{user}/reset-two-factor', [AdminUserController::class, 'resetTwoFactor'])->name('users.reset-two-factor');
             Route::delete('users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
         });
         Route::get('activity', [AdminActivityController::class, 'index'])->name('activity.index');

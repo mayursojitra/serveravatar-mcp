@@ -39,6 +39,7 @@ export interface User {
     email: string;
     role: 'user' | 'admin';
     must_change_password: boolean;
+    two_factor_enabled?: boolean;
     avatar?: string;
 }
 

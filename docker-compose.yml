@@ -18,6 +18,7 @@ x-app: &app
     TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
     TRUSTED_HOSTS: ${TRUSTED_HOSTS:-}
     CSP_MODE: ${CSP_MODE:-enforce}
+    REQUIRE_TWO_FACTOR: ${REQUIRE_TWO_FACTOR:-false}
     DB_CONNECTION: mysql
     DB_HOST: db
     DB_PORT: 3306

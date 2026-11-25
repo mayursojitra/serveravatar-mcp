@@ -19,6 +19,7 @@ interface ManagedUser {
     role: 'user' | 'admin';
     disabled: boolean;
     must_change_password: boolean;
+    two_factor_enabled: boolean;
     has_token: boolean;
     created_at: string;
 }
@@ -170,6 +171,13 @@ function UserRow({ user }: { user: ManagedUser }) {
     // The current values are read at click time. A form object created once would keep sending the
     // values from when the row first loaded, undoing a rename or toggling the wrong way.
     const toggleDisabled = () => router.patch(route('admin.users.update', user.id), { name: user.name, disabled: !user.disabled }, request);
+    const resetTwoFactor = () => {
+        if (
+            window.confirm(`Turn off two-factor sign-in for ${user.email}? They are signed out everywhere and can set it up again after signing in.`)
+        ) {
+            router.post(route('admin.users.reset-two-factor', user.id), {}, request);
+        }
+    };
     const remove = () => {
         if (window.confirm(`Delete ${user.email}? This cannot be undone.`)) {
             router.delete(route('admin.users.destroy', user.id), request);
@@ -182,6 +190,7 @@ function UserRow({ user }: { user: ManagedUser }) {
                 <div className="font-medium">{user.name}</div>
                 <div className="text-muted-foreground text-xs">{user.email}</div>
                 <div className="text-muted-foreground text-xs">{user.has_token ? 'ServerAvatar token saved' : 'No ServerAvatar token yet'}</div>
+                <div className="text-muted-foreground text-xs">{user.two_factor_enabled ? 'Two-factor sign-in on' : 'Two-factor sign-in off'}</div>
             </td>
             <td className="py-3 pr-4">
                 <Badge variant={user.role === 'admin' ? 'default' : 'outline'}>{user.role}</Badge>
@@ -206,6 +215,11 @@ function UserRow({ user }: { user: ManagedUser }) {
                         <Button size="sm" variant="outline" onClick={() => setResetting(true)}>
                             Reset password
                         </Button>
+                        {user.two_factor_enabled && (
+                            <Button size="sm" variant="outline" disabled={busy} onClick={resetTwoFactor}>
+                                Reset two-factor
+                            </Button>
+                        )}
                         <Button size="sm" variant="outline" disabled={busy} onClick={toggleDisabled}>
                             {user.disabled ? 'Enable' : 'Disable'}
                         </Button>

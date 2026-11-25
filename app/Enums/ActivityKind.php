@@ -9,6 +9,11 @@ enum ActivityKind: string
     case AuthLoginFailed = 'auth.login_failed';
     case AuthPasswordChanged = 'auth.password_changed';
     case AuthPasswordResetCompleted = 'auth.password_reset_completed';
+    case AuthTwoFactorEnabled = 'auth.two_factor_enabled';
+    case AuthTwoFactorDisabled = 'auth.two_factor_disabled';
+    case AuthTwoFactorFailed = 'auth.two_factor_failed';
+    case AuthTwoFactorRecoveryUsed = 'auth.two_factor_recovery_used';
+    case AuthTwoFactorCodesRegenerated = 'auth.two_factor_codes_regenerated';
 
     case McpInitialize = 'mcp.initialize';
     case McpToolsList = 'mcp.tools_list';
@@ -33,5 +38,6 @@ enum ActivityKind: string
     case AdminUserDisabled = 'admin.user_disabled';
     case AdminUserEnabled = 'admin.user_enabled';
     case AdminPasswordReset = 'admin.password_reset';
+    case AdminTwoFactorReset = 'admin.two_factor_reset';
     case AdminUserDeleted = 'admin.user_deleted';
 }

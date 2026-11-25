@@ -41,5 +41,5 @@ it('only the allowed guest routes exist', function () {
         ->values()
         ->all();
 
-    expect($guestUris)->toBe(['forgot-password', 'login', 'reset-password', 'reset-password/{token}']);
+    expect($guestUris)->toBe(['forgot-password', 'login', 'reset-password', 'reset-password/{token}', 'two-factor-challenge']);
 });

@@ -34,6 +34,7 @@ The admin command asks for a password on a hidden prompt (or reads `ADMIN_PASSWO
 | `APP_URL` | The public address, with `https://`. The app answers **only** to this host (and `localhost`): a request that names any other host gets `400 Invalid host`. If you change the address, change this too. |
 | `TRUSTED_HOSTS` | Extra hostnames the app may be opened at, comma-separated. Usually empty. |
 | `CSP_MODE` | Content-Security-Policy for pages: `enforce` (default), `report-only` (the browser only logs problems in its console) or `off`. Leave it alone unless a page breaks. |
+| `REQUIRE_TWO_FACTOR` | `false` (default): each user chooses whether to turn on two-factor sign-in. `true`: every user must set it up (authenticator app plus recovery codes) before they can use anything else. Two-factor secrets are encrypted with `APP_KEY`, so if you ever change `APP_KEY`, run `php artisan serveravatar:reset-two-factor <email>` for each user who had it on. |
 | `SESSION_SECURE_COOKIE` | `true`, so the session cookie is only ever sent over HTTPS. |
 | `DB_*` | Your database. Use a user that can only reach this database. |
 | `TRUSTED_PROXIES` | The IP address(es) of your reverse proxy, comma-separated. Leave it empty if there is no proxy. Use `*` only if the app is reachable solely through your own proxy. |
@@ -151,7 +152,7 @@ Run `composer audit` and `npm audit` now and then (`composer audit` needs Compos
 ## Security checklist
 
 - HTTPS on, `APP_DEBUG=false`, `APP_ENV=production`, `APP_URL` set to your real address.
-- Strong, unique passwords for admins. Two-factor sign-in is not available yet.
+- Strong, unique passwords for admins, and two-factor sign-in turned on (**Settings → Two-factor**; set `REQUIRE_TWO_FACTOR=true` to require it of everyone). If someone loses their app and recovery codes, an admin resets it on **Admin → Users**, or you run `php artisan serveravatar:reset-two-factor <email>` (inside Docker: `docker compose exec app php artisan serveravatar:reset-two-factor <email>`).
 - `APP_KEY`, the OAuth keys and the database backed up and private.
 - Use ServerAvatar tokens with the least role that does the job: a user who only needs to read can use a token whose ServerAvatar role is read-only, whatever level they choose here.
 - Look at **All activity** now and then. See also [SECURITY.md](../SECURITY.md).
